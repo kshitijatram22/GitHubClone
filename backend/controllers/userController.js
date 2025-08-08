@@ -160,7 +160,7 @@ async function deleteUserProfile(req, res) {
       return res.status(404).json({message: "User not found"})
     }
 
-    res.json({message: "User profile deleted"});
+    res.json({message: "User profile deleted"});    
   } catch (err) {
     console.error("Error during deleting user : ", err.message);
     res.status(500).send("Server error");

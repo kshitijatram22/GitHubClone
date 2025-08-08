@@ -1,36 +1,36 @@
-const mongoose = require('mongoose');
-const { String, required } = require('yargs');
-const {Schema} = mongoose;
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const RepositorySchema = new Schema({
-    name : {
-        type: String,
-        required: true,
-        unique: true,
-    }, 
-    description: {
-        type: String,
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  description: {
+    type: String,
+  },
+  content: [
+    {
+      type: String,
     },
-    content: [{
-        type: String,
-    },
-],
-visibility: {
+  ],
+  visibility: {
     type: Boolean,
-},
-owner:{
+  },
+  owner: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
-},
-issues:[{
-    type: Schema.Types.ObjectId,
-    ref: "Issue",
-},
-],
-
+  },
+  issues: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Issue",
+    },
+  ],
 });
 
 const Repository = mongoose.model("Repository", RepositorySchema);
 
-export default Repository;
+module.exports = Repository;
