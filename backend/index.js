@@ -17,8 +17,8 @@ const { commitRepo } = require("./controllers/commit");
 const { pushRepo } = require("./controllers/push");
 const { pullRepo } = require("./controllers/pull");
 const { revertRepo } = require("./controllers/revert");
-const { error } = require("console");
 
+// ---------------- CLI Commands ---------------- //
 yargs(hideBin(process.argv))
   .command("init", "Initialise a new repository", {}, initRepo)
   .command(
@@ -27,7 +27,7 @@ yargs(hideBin(process.argv))
     (yargs) => {
       yargs.positional("file", {
         describe: "File to add to the staging area",
-        type: "String",
+        type: "string",
       });
     },
     (argv) => {
@@ -49,12 +49,12 @@ yargs(hideBin(process.argv))
   )
   .command("start", "Starts the new Server", {}, startServer)
   .command("push", "Push commits to S3", {}, pushRepo)
-  .command("pull", "Pull commits to S3", {}, pullRepo)
+  .command("pull", "Pull commits from S3", {}, pullRepo)
   .command(
     "revert <commitID>",
     "Revert to specific commit",
     (yargs) => {
-      yargs.positional("commitId", {
+      yargs.positional("commitID", {
         describe: "Commit ID to revert to",
         type: "string",
       });
@@ -63,33 +63,37 @@ yargs(hideBin(process.argv))
       revertRepo(argv.commitID);
     }
   )
-  .demandCommand(1, "You need atleast one command")
+  .demandCommand(1, "You need at least one command")
   .help().argv;
 
-//Start the Server Code
+// ---------------- Start Server ---------------- //
 function startServer() {
   const app = express();
   const port = process.env.PORT || 3000;
 
+  // Middleware
   app.use(bodyParser.json());
   app.use(express.json());
+  app.use(cors({ origin: "*" }));
 
+  // Routes
+  app.use("/", mainRouter);
+
+  // Connect MongoDB (Mongoose)
   const mongoURI = process.env.MONGODB_URI;
 
   mongoose
-    .connect(mongoURI)
-    .then(() =>
-      console
-        .log("MongoDB Connected."))
-        .catch((err) => console.log("Error raised", err));
-    ;
+    .connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch((err) => {
+      console.error("❌ MongoDB Connection Error:", err);
+      process.exit(1);
+    });
 
-  app.use(cors({ origin: "*" }));
-
-  app.use("/", mainRouter);
-
-  let user = "test";
-
+  // Socket.IO
   const httpServer = http.createServer(app);
   const io = new Server(httpServer, {
     cors: {
@@ -98,24 +102,25 @@ function startServer() {
     },
   });
 
-  io.on("Connection", (socket) => {
+  io.on("connection", (socket) => {
+    console.log("🔗 A user connected:", socket.id);
+
     socket.on("joinRoom", (userID) => {
-      user = userID;
-      console.log("=====");
-      console.log(user);
-      console.log("=====")
-      console.log(userID);
-    })
-  })
+      console.log(`📢 User joined room: ${userID}`);
+    });
 
-  const db = mongoose.connection;
-
-  db.once("open", async() => {
-    console.log("CRUD Operations.");
-    //CRUD OPERATIONS
+    socket.on("disconnect", () => {
+      console.log("❌ A user disconnected:", socket.id);
+    });
   });
 
+  // DB ready
+  mongoose.connection.once("open", () => {
+    console.log("📂 MongoDB ready for CRUD operations.");
+  });
+
+  // Start server
   httpServer.listen(port, () => {
-    console.log(`Server is running on ${port}`);
-  })
+    console.log(`🚀 Server is running on port ${port}`);
+  });
 }
