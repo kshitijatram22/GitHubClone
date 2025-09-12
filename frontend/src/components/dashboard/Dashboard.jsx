@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [loadingSuggested, setLoadingSuggested] = useState(true);
 
+  // ✅ Always ensure trailing slash in .env value (e.g. "https://your-api.com/")
   const API = import.meta.env.VITE_PROD_BASE_URL;
 
   // 🔍 Search filtering
@@ -39,10 +40,8 @@ export default function Dashboard() {
 
     const fetchRepositories = async () => {
       try {
-        const response = await fetch(
-          `${API}repo/user/${userId}`
-        );
-        const data = await response.json();
+        const response = await axios.get(`${API}/repo/user/${userId}`);
+        const data = response.data;
         setRepositories(
           Array.isArray(data.repositories) ? data.repositories : []
         );
@@ -75,17 +74,13 @@ export default function Dashboard() {
 
     fetchRepositories();
     fetchSuggestedRepositories();
-  }, []);
+  }, [API]);
 
   // 🗑️ Delete repo function
   const handleDeleteRepo = async (repoId, repoName) => {
-    if (
-      window.confirm(`Are you sure you want to delete "${repoName}"?`)
-    ) {
+    if (window.confirm(`Are you sure you want to delete "${repoName}"?`)) {
       try {
-        await fetch(`${API}/repo/delete/${repoId}`, {
-          method: "DELETE",
-        });
+        await axios.delete(`${API}/repo/delete/${repoId}`);
         // Update state after deletion
         setRepositories((prev) => prev.filter((r) => r._id !== repoId));
         setSearchResults((prev) => prev.filter((r) => r._id !== repoId));
@@ -129,7 +124,9 @@ export default function Dashboard() {
                   className="p-4 mb-4 bg-[#0d1117] rounded-lg border border-gray-700 hover:border-blue-500 hover:shadow-md transition"
                 >
                   <h4 className="font-semibold text-gray-100">{repo.name}</h4>
-                  <p className="text-sm text-gray-400 mt-1">{repo.description}</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {repo.description}
+                  </p>
                 </div>
               ))
             ) : (
@@ -165,7 +162,9 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-400 mt-2">{repo.description}</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    {repo.description}
+                  </p>
                 </div>
               ))
             ) : (
