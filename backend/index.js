@@ -74,7 +74,16 @@ function startServer() {
   // Middleware
   app.use(bodyParser.json());
   app.use(express.json());
-  app.use(cors({ origin: "*" }));
+  // app.use(cors({ origin: "*" }));
+  app.use(cors({
+  origin: [
+    "http://localhost:5173",              // local dev (Vite)
+    "https://your-frontend.vercel.app"   // your deployed frontend domain
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 
   // Routes
   app.use("/", mainRouter);
