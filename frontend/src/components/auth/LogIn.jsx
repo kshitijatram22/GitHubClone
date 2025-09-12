@@ -11,12 +11,13 @@ const LogIn = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+    const API = import.meta.env.VITE_PROD_BASE_URL;
 
   const handleLogIn = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/login/", {
+      const res = await axios.post(`${API}/login/`, {
         email: email,
         password: password,
       });

@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [loadingSuggested, setLoadingSuggested] = useState(true);
 
+  const API = import.meta.env.VITE_PROD_BASE_URL;
+
   // 🔍 Search filtering
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -38,7 +40,7 @@ export default function Dashboard() {
     const fetchRepositories = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/repo/user/${userId}`
+          `${API}repo/user/${userId}`
         );
         const data = await response.json();
         setRepositories(
@@ -54,7 +56,7 @@ export default function Dashboard() {
 
     const fetchSuggestedRepositories = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/repo/all");
+        const response = await axios.get(`${API}/repo/all`);
         const data = response.data;
         setSuggestedRepositories(
           Array.isArray(data.repositories)
@@ -81,7 +83,7 @@ export default function Dashboard() {
       window.confirm(`Are you sure you want to delete "${repoName}"?`)
     ) {
       try {
-        await fetch(`http://localhost:3000/repo/delete/${repoId}`, {
+        await fetch(`${API}/repo/delete/${repoId}`, {
           method: "DELETE",
         });
         // Update state after deletion

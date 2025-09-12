@@ -11,13 +11,14 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
 
   const { setCurrentUser } = useAuth();
+     const API = import.meta.env.VITE_PROD_BASE_URL;
 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/signup", {
+      const res = await axios.post(`${API}/signup/`, {
         email:email,
         password: password,
         username: username,

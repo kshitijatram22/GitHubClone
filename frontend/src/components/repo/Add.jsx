@@ -6,6 +6,7 @@ export default function CreateRepository() {
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState(true); // true = public, false = private
   const [loading, setLoading] = useState(false);
+  const API = import.meta.env.VITE_PROD_BASE_URL;
 
   const handleCreateRepo = async (e) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ export default function CreateRepository() {
         return;
       }
 
-      const response = await axios.post("http://localhost:3000/repo/create", {
+      const response = await axios.post(`${API}/repo/create`, {
         name,
         description,
         visibility,
